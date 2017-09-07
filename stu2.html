@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Vue Study 2</title>
+    <script src="https://unpkg.com/vue"></script>
+</head>
+<body>
+<div id="app">
+    {{a}}
+    {{b}}
+</div>
+<script>
+    var data = {a:1,b:'hahahah'};
+    var vm = new Vue({
+        el:'#app',
+        data:data,
+        created:function(){console.log('a is: '+this.a);}
+    });
+
+
+    //试一试箭头函数：
+
+    //一个参数的时候：
+    var fn1 = x=>x*x;
+    console.log(fn1(8));//64
+
+    //两个参数的时候：
+    var fn2 = (x,y)=>x*y;
+    console.log(fn2(5,6));//30
+
+    //函数体有多个语句的时候：
+    var fn3 = x => {
+        if (x>0){
+            return x*x;
+        }else{
+            return -x*x;
+        }
+        console.log(this);
+    }
+    console.log(fn3(5));//25
+    console.log(fn3(-5));//-25
+
+    //没有参数的时候：
+    var fn4 = ()=>5+5;
+    console.log(fn4());//10
+
+    //返回一个对象的时候,因为对象和函数体的{}有冲突，所以改为：
+    var fn5 = x =>({age:x});
+    console.log(fn5('26岁，老了老了').age);//26岁，老了老了
+
+    //this在箭头函数中指向词法作用域：
+    var obj = {
+        birth:1990,
+        getAge:function () {
+            var b=this.birth;//1990
+            var fn = () => new Date().getFullYear()-this.birth;//this指向obj对象
+            return fn();
+        }
+    }
+    console.log(obj.getAge());//27
+</script>
+</body>
+</html>
