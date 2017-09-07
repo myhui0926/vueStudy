@@ -3,7 +3,6 @@ var gulp = require('gulp'),
 
 gulp.task('connect',function(){
     connect.server({
-        root:'vueStu',
         livereload:true
     });
 });
