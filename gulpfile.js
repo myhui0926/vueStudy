@@ -13,7 +13,7 @@ gulp.task('html',function(){
 });
 
 gulp.task('watch',function(){
-    gulp.watch(['./*.html','./*.js','./*.css'],['html']);
+    gulp.watch(['./**/*.html','./*.js','./*.css'],['html']);
 });
 
 gulp.task('default',['connect','watch']);
