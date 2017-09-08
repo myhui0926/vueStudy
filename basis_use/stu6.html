@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>条件渲染：v-if</title>
+    <script src="https://unpkg.com/vue"></script>
+</head>
+<body>
+<!--条件渲染-->
+<div id="vm-1">
+    <p v-if="ok">Hello</p>
+    <p v-else>Hi,Another!</p>
+</div>
+
+<script>
+    var vm1 = new Vue({
+        el:'#vm-1',
+        data:{
+            ok:false
+        }
+    });
+</script>
+
+<!--在<template>中配合v-if-条件渲染一整组-->
+<div id="vm-2">
+    <template v-if="ok">
+        <h1>Title</h1>
+        <p>Paragraph 1</p>
+        <p>Paragraph 2</p>
+    </template>
+</div>
+<script>
+    var vm2 = new Vue({
+        el:'#vm-2',
+        data:{
+            ok:true
+        }
+    });
+</script>
+
+<!-- v-else -->
+<div id="vm-3">
+    <div v-if="Math.random()>0.5">
+        Now you see me.
+    </div>
+    <div v-else>
+        Now yo don't
+    </div>
+</div>
+<script>
+    var vm3 = new Vue({
+        el:'#vm-3',
+        data:{
+
+        }
+    });
+</script>
+
+<!-- v-else-if -->
+<div id="vm-4">
+    <p v-if="type === 'A' ">A</p>
+    <p v-else-if="type === 'B' ">B</p>
+    <p v-else-if="type === 'C' ">C</p>
+    <p v-else>Not A/B/C</p>
+</div>
+<script>
+    var vm4 = new Vue({
+        el:'#vm-4',
+        data:{
+            type:'A'
+        }
+    });
+</script>
+
+<!--用key管理可复用的元素-->
+<div id="loginBox">
+    <template v-if="loginType === 'username' ">
+        <label>Username:</label>
+        <input type="text" placeholder="Enter yout name" key="username-input">
+    </template>
+    <template v-else>
+        <label>Email:</label>
+        <input type="text" placeholder="Enter your email address" key="email-input">
+    </template>
+    <button id="toggleLT">Toggle login type</button>
+</div>
+<script>
+    var loginBox = new Vue({
+        el:'#loginBox',
+        data:{
+            loginType:'username'
+        }
+    });
+    document.querySelector('#toggleLT').addEventListener('click',function(){
+        if (loginBox.loginType==='username'){
+            loginBox.loginType='email';
+        }else{
+            loginBox.loginType='username';
+        }
+    });
+</script>
+
+<!-- v-show -->
+<div v-show="ok" id="vm-5">Test v-show</div>
+<script>
+    var vm5 = new Vue({
+        el:'#vm-5',
+        data:{
+            ok:true
+        }
+    })
+</script>
+</body>
+</html>
