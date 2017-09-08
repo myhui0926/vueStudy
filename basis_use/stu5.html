@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:v-bind="http://www.w3.org/1999/xhtml">
+<head>
+    <meta charset="UTF-8">
+    <title>Class与Style绑定</title>
+    <script src="https://unpkg.com/vue"></script>
+    <style>
+        .static{
+            color: #00ff00;
+            display: none;
+        }
+        .active{
+            display: block;
+        }
+        .text-danger{
+            color: #ff0000;
+        }
+    </style>
+</head>
+<body>
+<!--对象语法-->
+<div id="vm-1" class="static" v-bind:class="{'active':isActive,'text-danger':hasError}">123</div>
+<script>
+    var vm1 = new Vue({
+        el:'#vm-1',
+        data:{
+            isActive:true,
+            hasError:false
+        }
+    });
+</script>
+<!--直接绑定数据里的一个对象-->
+<div id="vm-1-1" class="static" v-bind:class="classObject">Test String</div>
+<script>
+    var vm1_1 = new Vue({
+        el:'#vm-1-1',
+        data:{
+            classObject:{
+                'active':true,
+                'text-danger':false
+            }
+        }
+    })
+</script>
+<!--绑定返回对象的计算属性-->
+<div id="vm-1-2" class="static" v-bind:class="classObject">Song chaohui</div>
+<script>
+    var vm_1_2 = new Vue({
+        el:'#vm-1-2',
+        data:{
+            isActive:true,
+            error:null
+        },
+        computed:{
+            classObject:function () {
+                return {
+                    active:this.isActive && !this.error,
+                    'text-danger':this.error && this.error.type==='fatal'
+                }
+            }
+        }
+    })
+</script>
+
+<!--数组语法-->
+<div id="vm-2" class="static" v-bind:class="[activeClass,errorClass]">This is the another text</div>
+<script>
+    var vm2 = new Vue({
+        el:'#vm-2',
+        data:{
+            activeClass:'active',
+            errorClass:'text-danger'
+        }
+    });
+</script>
+
+<!--用在组件上-->
+<script>
+    Vue.component('my-component',{
+        props:['todo'],
+        template:'<p class="foo bar">{{todo}}</p>',
+    });
+    Vue.component('com-mine',{
+        props:['testCom'],
+        template:'<p class="static">{{testCom}}</p>'
+    });
+</script>
+
+    <my-component v-bind:todo="mydo" id="vm-3" class="bzz boo"></my-component>
+    <com-mine id="vm-4" v-bind:test-com="msg" v-bind:class="{active:isActive}"></com-mine>
+<script>
+    var vm3 = new Vue({
+        el:'#vm-3',
+        data:{
+            mydo:'A String'
+        }
+    });
+
+    var vm4 = new Vue({
+        el:'#vm-4',
+        data:{
+            msg:"Hello,beautiful future girl!",
+            isActive:true
+        }
+    });
+</script>
+
+<!--绑定内联样式-->
+<div id="vm-5" v-bind:style="{color:activeColor,fontSize:fontSize+'px'}">
+    Hello,The future world!
+</div>
+<script>
+    var vm5 = new Vue({
+        el:'#vm-5',
+        data:{
+            activeColor:'#ff0000',
+            fontSize:36
+        }
+    })
+</script>
+<!--绑定内联样式--样式对象--自动添加前缀-->
+<div id="vm-6" v-bind:style="styleObject">
+    Hello,The great world!
+</div>
+<script>
+    var vm6 = new Vue({
+        el:'#vm-6',
+        data:{
+            styleObject:{
+                color:'#33cc66',
+                fontSize:'32px',
+                marginTop:'100px',
+                transform:'rotate(10deg)'
+            }
+        }
+    });
+</script>
+<!--数组语法-->
+<div id="vm-7" v-bind:style="[baseStyle,overridingStyles]">
+    Hello Vue!!!!Study it!!!!
+</div>
+<script>
+    var vm7 = new Vue({
+        el:'#vm-7',
+        data:{
+            baseStyle:{
+                fontSize:'38px',
+                color:'#ff0000',
+                marginTop:'50px'
+            },
+            overridingStyles:{
+                transform:'rotate(5deg)',
+                boxShadow:'10px 10px 10px #000000'
+            }
+        }
+    })
+</script>
+</body>
+</html>
