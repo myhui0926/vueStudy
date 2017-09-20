@@ -1,0 +1,714 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>组件</title>
+    <script src="../lib/vue_dev.js"></script>
+    <style>
+        div{
+            margin:20px 5px;
+            padding: 5px;
+            border:1px solid #ececec;
+        }
+        h2{
+            margin-top: 30px;
+            font-size: 20px;
+        }
+        h3{
+            font-size: 18px;
+        }
+    </style>
+</head>
+<body>
+<h2>确保在初始化根实例之前注册了组件</h2>
+<div id="example-1">
+    <my-component></my-component>
+</div>
+<script>
+    //注册
+    Vue.component('my-component',{
+        template:'<p>A custom component!</p>'
+    });
+    //创建根实例
+    new Vue({
+        el:'#example-1'
+    });
+</script>
+
+<h2>局部注册</h2>
+<div id="example-2">
+    <my-component2></my-component2>
+</div>
+<script>
+    var child = {
+        template:'<p>A custom component 2</p>'
+    }
+    new Vue({
+        el:'#example-2',
+        components:{
+            'my-component2':child
+        }
+    });
+</script>
+
+<h2>DOM模板解析说明</h2>
+<h3>自定义组件中使用受限元素会导致一些问题</h3>
+<table id="example-3">
+    <my-row></my-row>
+</table>
+<script>
+    var child_table = {
+        template:'<tr><td>123</td></tr>'
+    };
+    new Vue({
+        el:'#example-3',
+        components:{
+            'my-row':child_table
+        }
+    });
+</script>
+<h2>自定义组件中使用受限元素变通方案</h2>
+<table id="example-4">
+    <tr is="my-row"></tr>
+</table>
+<script>
+    var child_table2 = {
+        template:'<tr><td>456</td></tr>'
+    };
+    new Vue({
+        el:'#example-4',
+        components:{
+            'my-row':child_table2
+        }
+    })
+</script>
+
+<h2>data必须是函数</h2>
+<div id="example-5">
+    <my-component_t5></my-component_t5>
+    <my-component_t5></my-component_t5>
+    <my-component_t5></my-component_t5>
+</div>
+<script>
+    var data = {counter:0};
+    Vue.component('my-component_t5',{
+        template:'<span>{{counter}}</span>',
+        data:function(){
+            data.counter++;
+            return data;
+        }
+    });
+    new Vue({
+        el:'#example-5'
+    });
+</script>
+<h2>由于这三个组件共享了同一个 data，因此增加一个 counter 会影响所有组件！</h2>
+<h3>我们可以通过为每个组件返回全新的 data 对象来解决这个问题</h3>
+<div id="example-6">
+    <my-component_t6></my-component_t6>
+    <my-component_t6></my-component_t6>
+    <my-component_t6></my-component_t6>
+</div>
+<script>
+    var a = 0;
+    Vue.component('my-component_t6',{
+        template:'<span>{{counter}}</span>',
+        data:function(){
+            a++;
+            return {
+                counter:a++//现在每个 counter 都有它自己内部的状态了
+            }
+        }
+    });
+    new Vue({
+        el:'#example-6'
+    });
+</script>
+
+<h2>组合组件</h2>
+<h3>Props</h3>
+<h2>使用Props传递数据</h2>
+<h3>静态Props</h3>
+<div id="example-7">
+    <child message_c="message_p"></child>
+</div>
+<script>
+    Vue.component('child',{
+        props:['message_c'],
+        template:'<span>{{message_c}}</span>'
+    });
+    new Vue({
+        el:'#example-7',
+    });
+</script>
+
+<h2>camelCase vs. kebab-case</h2>
+<div id="example-8">
+    <child2 v-bind:message-child="messageParent"></child2>
+</div>
+<script>
+    Vue.component('child2',{
+        props:['messageChild'],
+        template:'<span>{{messageChild}}</span>'
+    });
+    new Vue({
+        el:'#example-8',
+        data:{
+            messageParent:'Hello!Chaohui'
+        }
+    });
+</script>
+
+<h2>动态Props 使用v-bind</h2>
+<div id="example-9">
+    <input v-model="parentMsg">
+    <br>
+    <child3 v-bind:my-message="parentMsg"></child3>
+</div>
+<script>
+    Vue.component('child3',{
+        props:['myMessage'],
+        template:'<span>{{myMessage}}</span>'
+    });
+    new Vue({
+        el:'#example-9',
+        data:{
+            parentMsg:''
+        }
+    });
+</script>
+
+<h2>字面量语法 vs 动态语法</h2>
+<h3>传递了一个字符串1,字面prop</h3>
+<div id="example-10">
+    <comp_a some-prop="1"></comp_a>
+</div>
+<script>
+    Vue.component('comp_a',{
+        props:['someProp'],
+        template:'<p>result:{{someProp+1}}</p>'//输出'11'
+    });
+    new Vue({
+        el:'#example-10'
+    });
+</script>
+<h2>传递数字1</h2>
+<div id="example-11">
+    <comp_b v-bind:some-prop="1"></comp_b>
+</div>
+<script>
+    Vue.component('comp_b',{
+        props:['someProp'],
+        template:'<span>{{someProp+1}}</span>'//输出2
+    });
+    new Vue({
+        el:'#example-11'
+    });
+</script>
+
+<h2>单项数据流</h2>
+<h3>定义一个局部变量，并用 prop 的值初始化它：</h3>
+<div id="example-12">
+    <comp_c v-bind:initial-counter="123"></comp_c>
+</div>
+<script>
+    Vue.component('comp_c',{
+        props:['initialCounter'],
+        data:function(){
+            return {counter:this.initialCounter}
+        },
+        template:'<span>{{counter+15}}</span>'
+    });
+    new Vue({
+        el:'#example-12'
+    });
+</script>
+
+<h2>定义一个计算属性，处理Prop的值并返回</h2>
+<div id="example-13">
+    <comp_d size="SONG"></comp_d>
+</div>
+<script>
+    Vue.component('comp_d',{
+        props:['size'],
+        computed:{
+            normalizedSize:function(){
+                return this.size.trim().toLowerCase();
+            }
+        },
+        template:'<span>{{normalizedSize}}</span>'
+    });
+    new Vue({
+        el:'#example-13'
+    });
+</script>
+
+<h2>Prop验证</h2>
+<h3>需要用对象的形式，而不能用字符串数组</h3>
+<div id="example-14">
+    <comp_e  v-bind:prop-a="123" prop-b="song" prop-c="Chaohui" v-bind:prop-d="12"></comp_e>
+</div>
+<script>
+    Vue.component('comp_e',{
+        props:{
+            propA:Number,
+            propB:{
+                type:[String,Number],
+                required:true
+            },
+            propC:{
+                type:String,
+                required:true
+            },
+            propD:{
+                validator:function (value) {
+                    return value>10;
+                }
+            }
+        },
+        template:'<span>{{propA}},{{propB}},{{propC}},{{propD}}</span>'
+    });
+    new Vue({
+        el:'#example-14',
+        data:{
+            hello:'Nice to meet you!'
+        }
+    });
+</script>
+
+<h2>非Prop特性</h2>
+<div id="example-15">
+    <bs-data-input data-3d-data-picker></bs-data-input>
+</div>
+<script>
+    Vue.component('bs-data-input',{
+        template:'<input>'
+    });
+    new Vue({
+        el:'#example-15'
+    });
+</script>
+
+<h2>替换/覆盖现有的特性</h2>
+<div id="example-16">
+    <bs-date-input data-3d-data-picker="true" class="data-picker-theme-dark"></bs-date-input>
+</div>
+<script>
+    Vue.component('bs-date-input',{
+        template:'<input type="date" class="form-control">'
+    });
+    new Vue({
+        el:'#example-16'
+    });
+</script>
+
+<h2>自定义事件</h2>
+<div id="counter-event-example">
+    <p>{{total}}</p>
+    <button-counter v-on:increment="incrementTotal"></button-counter>
+    <button-counter v-on:increment="incrementTotal"></button-counter>
+</div>
+<script>
+    Vue.component('button-counter',{
+        template:'<button v-on:click="incrementCounter">{{counter}}</button>',
+        data:function(){
+            return {
+                counter:0
+            }
+        },
+        methods:{
+            incrementCounter:function(){
+                this.counter +=1;
+                this.$emit('increment')
+            }
+        }
+    });
+    new Vue({
+        el:'#counter-event-example',
+        data:{
+            total:0
+        },
+        methods:{
+            incrementTotal:function(){
+                this.total += 1;
+            }
+        }
+    });
+</script>
+
+<h2>给组建绑定原生事件，使用.native修饰符</h2>
+<div id="example-17">
+    <test-component-a v-bind:msg="message" v-on:click.native="sayHello"></test-component-a>
+</div>
+<script>
+    Vue.component('test-component-a',{
+        props:['msg'],
+        template:'<p>{{msg}}</p>'
+    });
+    new Vue({
+        el:'#example-17',
+        data:{
+           message:'123'
+        },
+        methods:{
+            sayHello:function(){
+                this.message = 'Hello!'
+            }
+        }
+    });
+</script>
+
+<h2>.sync修饰符,可以通过子组件更新父组件的数据</h2>
+<div id="example-18">
+    <p>{{bar}}</p>
+    <test-comp-b :foo.sync="bar"></test-comp-b>
+</div>
+<script>
+    Vue.component('test-comp-b',{
+        props:['foo'],
+        template:'<p v-on:click="updateFoo">{{foo}}-子组件内容</p>',
+        methods:{
+            updateFoo:function(){
+                this.$emit('update:foo','songchaohui')
+            }
+        }
+    });
+    new Vue({
+        el:'#example-18',
+        data:{
+            bar:'sss'
+        }
+    });
+</script>
+
+<h2>使用自定义事件的表单输入组件</h2>
+<div id="example-19">
+    <p>{{price}}</p>
+    <currency-input v-model="price"></currency-input>
+</div>
+<script>
+    Vue.component('currency-input',{
+        template:'\
+        <span>\
+        $\
+        <input\
+        ref="input"\
+        v-bind:value="value"\
+        v-on:input="updateValue($event.target.value)"\
+        >\
+        </span>\
+        ',
+        props:['value'],
+        methods:{
+            //不是直接更新值，而是使用此方法来对输入值进行格式化和位数限制
+            updateValue:function (value) {
+                var formattedValue = value
+                    .trim()
+                    .slice(0,value.indexOf('.')===-1?value.length:value.indexOf('.')+3);
+                if (formattedValue!=value){
+                    this.$refs.input.value = formattedValue;
+                }
+                this.$emit('input',Number(formattedValue));
+            }
+        }
+    });
+    new Vue({
+        el:'#example-19',
+        data:{
+            price:0
+        }
+    });
+</script>
+
+<h2>定制组建的v-model</h2>
+<div id="example-20">
+    <p>{{foo}}</p>
+    <my-checkbox v-model="foo" value="some value"></my-checkbox>
+</div>
+<script>
+    Vue.component('my-checkbox',{
+        model:{
+            prop:'checked',
+            event:'change'
+        },
+        props:{
+            checked:Boolean,
+            value:String
+        },
+        template:'<input type="checkbox" checked>'
+    });
+    new Vue({
+        el:'#example-20',
+        data:{
+            foo:false
+        }
+    });
+</script>
+
+<h2>非父子组件通信</h2>
+<div id="example-21">
+    <my-component-xa></my-component-xa>
+    <my-component-xb></my-component-xb>
+</div>
+<script>
+
+</script>
+
+<h2>使用插槽分发内容</h2>
+<h3>编译作用域</h3>
+<div id="example-22">
+    <child-component></child-component>
+</div>
+<script>
+    Vue.component('child-component',{
+        template:'<p>{{message}}</p>',
+        data:function () {
+            return {
+                message:'Hello,chaohui!'
+            }
+        }
+    });
+    new Vue({
+        el:'#example-22',
+    });
+</script>
+<div id="example-23">
+    <child-component-2></child-component-2>
+</div>
+<script>
+    Vue.component('child-component-2',{
+        template:'<div v-show="someChildProperty">Child</div>',
+        data:function(){
+            return {
+                someChildProperty:true
+            }
+        }
+    });
+    new Vue({
+        el:'#example-23'
+    });
+</script>
+
+<h3>单个插槽</h3>
+<div id="example-24">
+    <my-component-p>
+        <my-component-c></my-component-c>
+    </my-component-p>
+</div>
+<script>
+    Vue.component('my-component-c',{
+        template:'<div><h5>我是子组件标题</h5><slot>只有在没有要分发的内容时才会显示</slot></div>'
+    });
+    Vue.component('my-component-p',{
+        template:'<div><h4>我是父组件标题</h4><my-component-c><p>这是一些初始内容</p><p>这是更多的初始内容</p></my-component-c></div>'
+    });
+    new Vue({
+        el:'#example-24'
+    });
+</script>
+
+<h3>具名插槽</h3>
+<div id="example-25">
+    <app-layout-p>
+        <app-layout></app-layout>
+    </app-layout-p>
+</div>
+<script>
+    Vue.component('app-layout-p',{
+        template:
+        '<app-layout>' +
+            '<h1 slot="header">这里可能是一个页面标题</h1>' +
+            '<p>主要内容的一个段落</p><p>另一个主要段落</p>' +
+
+            '<p slot="footer">这里有一些联系信息</p>'+
+         '</app-layout>'
+    });
+    Vue.component('app-layout',{
+        template:'<div class="container" >' +
+        '<header>' +
+        '<slot name="header"></slot>' +
+        '</header>' +
+            '<main>' +
+                '<slot></slot>'+
+            '</main>'+
+            '<footer>' +
+            '<slot name="footer"></slot>'+
+            '</footer>'+
+        '</div>'
+    });
+    new Vue({
+        el:'#example-25'
+    });
+</script>
+
+<h3>作用域插槽</h3>
+<div id="example-26">
+    <my-componentx-p>
+        <child></child>
+    </my-componentx-p>
+</div>
+<script>
+    Vue.component('my-componentx-p',{
+        template:
+            '<div class="parent">' +
+            '<child>' +
+            '<template scope="props">' +
+            '<span>Hello from parent</span>' +
+            '<br>' +
+            '<span>{{props.text}}</span>' +
+            '</template>' +
+            '</child>' +
+            '</div>'
+    });
+    Vue.component('child',{
+        template:
+        '<div class="child">' +
+        '<slot text="Hello from child"></slot>' +
+        '</div>'
+    });
+    new Vue({
+        el:'#example-26'
+    });
+</script>
+
+<h3>作用域插槽更具代表性的用例是列表组件，允许组件自定义应该如何渲染列表每一项：</h3>
+<div id="example-27">
+    <my-awesome-list :items="items">
+        <template slot="item" scope="props">
+            <li class="my-fancy-item">{{props.text}}</li>
+        </template>
+    </my-awesome-list>
+</div>
+<script>
+    Vue.component('my-awesome-list',{
+        props:['items'],
+        template:
+        '<ul>' +
+        '<slot name="item" v-for="item  in items" :text="item.text"></slot>' +
+        '</ul>'
+    });
+    new Vue({
+        el:'#example-27',
+        data:{
+            items:[{text:'Hello'},{text:'Are'},{text:'you'},{text:'ok'}]
+        }
+    });
+</script>
+
+<h2>动态组件</h2>
+<div id="example-28">
+    <component v-bind:is="currentView"></component>
+</div>
+<script>
+    (function(){
+        var vm = new Vue({
+            el:'#example-28',
+            data:{
+                currentView:'home'
+            },
+            components:{
+                home:{
+                    template:'<h3>Welcome home!</h3>'
+                },
+                posts:{
+                    template:'<p>Nice to meet you ,Are you ok?</p>'
+                },
+                archive:{
+                    template:'<span>Hello!Hello!Hello!</span>'
+                }
+            }
+        });
+    })();
+</script>
+
+<h3>也可以直接绑定到组件对象上：</h3>
+<div id="example-29">
+    <component v-bind:is="currentView"></component>
+</div>
+<script>
+    (function(){
+        var home = {
+            template:'<p>Welcome home!</p>'
+        }
+        var vm = new Vue({
+            el:'#example-29',
+            data:{
+                currentView:home
+            }
+        })
+    })();
+</script>
+
+<h2>杂项</h2>
+<h3>编写可复用的组件</h3>
+<div id="example-30">
+    <my-component-a
+    :foo="baz"
+    :bar="qux"
+    @event-a="doThis"
+    @event-b="doThat"
+    >
+        <img slot="icon" src="../img/check-pass.png">
+        <p slot="main-text">Hello,Dear Vue!</p>
+    </my-component-a>
+</div>
+<script>
+    (function(){
+        Vue.component('my-component-a',{
+            props:['foo','bar'],
+            template:'<div v-on:click.self="doSomething">' +
+            '{{foo}}' +
+            '<slot name="main-text"></slot>' +
+            '<slot name="icon"></slot>' +
+            '<p v-on:click.stop="doAnother">{{bar}}</p>' +
+            '</div>',
+            methods:{
+                doSomething:function(){
+                    this.$emit('event-a');
+                },
+                doAnother:function(){
+                    this.$emit('event-b');
+                }
+            }
+        });
+        new Vue({
+            el:'#example-30',
+            data:{
+                baz:'TaoTaoTao',
+                qux:'YangYangYang'
+            },
+            methods:{
+                doThis:function(){
+                    this.baz = 'HuiHuiHui';
+                },
+                doThat:function(){
+                    this.qux = 'SongSongSong';
+                }
+            }
+        });
+    })();
+</script>
+
+<h3>子组件索引</h3>
+<div id="example-31">
+    <user-profile ref="profile"></user-profile>
+</div>
+<script>
+    (function(){
+        Vue.component('user-profile',{
+            template:'<p>{{testData}}</p>',
+            data:function(){
+                return {
+                    testData:'Hello,Mi!'
+                }
+            }
+        });
+        var exampleParent = new Vue({
+            el:'#example-31'
+        });
+        var child = exampleParent.$refs.profile;
+        child.testData = 'Hello,XiaoHuiHui!'
+    })();
+</script>
+</body>
+</html>
