@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:v-demo="http://www.w3.org/1999/xhtml">
+<head>
+    <meta charset="UTF-8">
+    <title>可复用性&组合</title>
+    <script src="../lib/vue_dev.js"></script>
+    <style>
+        div{
+            margin:20px 5px;
+            padding: 5px;
+            border:1px solid #ececec;
+        }
+        h2{
+            margin-top: 30px;
+            font-size: 20px;
+        }
+        h3{
+            font-size: 18px;
+        }
+        .fade-enter-active, .fade-leave-active {
+            transition: opacity 1s
+        }
+        .fade-enter, .fade-leave-to{
+            opacity: 0
+        }
+    </style>
+</head>
+<body>
+<h2>基础</h2>
+<script>
+    var myMixin = {
+        created:function(){
+            this.hello();
+        },
+        methods:{
+            hello:function(){
+                console.log('Hello from mixin');
+            }
+        }
+    }
+
+    var Component = Vue.extend({
+        mixins:[myMixin]
+    });
+
+    var component = new Component();
+</script>
+<h2>选项合并</h2>
+<script>
+    var mixin = {
+        created:function(){
+            console.log('混合对象的钩子被调用');
+        }
+    }
+
+    new Vue({
+        mixins:[mixin],
+        created:function(){
+            console.log('组件钩子被调用');
+        }
+    });
+</script>
+<script>
+    (function(){
+        var mixin = {
+            methods:{
+                foo:function(){
+                    console.log('foo');
+                },
+                conflicting:function(){
+                    console.log('from mixin');
+                }
+            }
+        }
+
+        var vm = new Vue({
+            mixins:[mixin],
+            methods:{
+                bar:function(){
+                    console.log('bar');
+                },
+                conflicting:function(){
+                    console.log('from self');
+                }
+            }
+        });
+
+        vm.foo();
+        vm.bar();
+        vm.conflicting();
+    })();
+</script>
+
+<h2>自定义指令</h2>
+<div id="exa1">
+    <input v-focus>
+</div>
+<script>
+    (function(){
+        Vue.directive('focus',{
+            // 当绑定元素插入到 DOM 中。
+            inserted:function(el){
+                // 聚焦元素
+                el.focus();
+            }
+        });
+        new Vue({
+            el:'#exa1'
+        })
+    })();
+</script>
+
+<h2>钩子函数</h2>
+<p>一个使用了这些参数的自定义钩子样例：</p>
+<div id="hook-arguments-example" v-demo:foo.a.b="message"></div>
+<script>
+    (function(){
+        Vue.directive('demo',{
+            bind:function(el,binding,vnode){
+                var s = JSON.stringify;
+                el.innerHTML =
+                        'name:' + s(binding.name) + '<br>' +
+                        'value:' + s(binding.value) + '<br>' +
+                        'expression:' +s(binding.expression) + '<br>' +
+                        'argument:' + s(binding.arg) + '<br>' +
+                        'modifiers:' + s(binding.modifiers) + '<br>' +
+                        'vnode keys:' + Object.keys(vnode).join(', ')
+            }
+        });
+
+        new Vue({
+            el:'#hook-arguments-example',
+            data:{
+                message:'hello!'
+            }
+        })
+    })();
+</script>
+
+<h2>渲染函数 & JSX</h2>
+<div id="exa-3">
+    <a name="hello-world" href="#hello-world">
+        Hello world!
+    </a>
+    <anchored-heading :level="2">Hello world!</anchored-heading>
+</div>
+<script type="text/x-template" id="anchored-heading-template">
+    <h1 v-if="level === 1">
+        <slot></slot>
+    </h1>
+    <h2 v-else-if="level === 2">
+        <slot></slot>
+    </h2>
+    <h3 v-else-if="level === 3">
+        <slot></slot>
+    </h3>
+    <h4 v-else-if="level === 4">
+        <slot></slot>
+    </h4>
+    <h5 v-else-if="level === 5">
+        <slot></slot>
+    </h5>
+    <h6 v-else-if="level === 6">
+        <slot></slot>
+    </h6>
+</script>
+<script>
+    Vue.component('anchored-heading',{
+        template:'#anchored-heading-template',
+        props:{
+            level:{
+                type:Number,
+                required:true
+            }
+        }
+    });
+    new Vue({
+        el:'#exa-3'
+    });
+</script>
+</body>
+</html>
