@@ -8,12 +8,12 @@ gulp.task('connect',function(){
 });
 
 gulp.task('html',function(){
-    gulp.src('./*.html')
+    gulp.src('./basis_use/*.html')
         .pipe(connect.reload());
 });
 
 gulp.task('watch',function(){
-    gulp.watch(['./**/*.html','./*.js','./*.css'],['html']);
+    gulp.watch(['./basis_use/*.html'],['html']);
 });
 
 gulp.task('default',['connect','watch']);

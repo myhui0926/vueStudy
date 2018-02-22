@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>过滤器</title>
+    <script src="../lib/vue_dev.js"></script>
+    <style>
+        div{
+            margin:20px 5px;
+            padding: 5px;
+            border:1px solid #ececec;
+        }
+        h2{
+            margin-top: 30px;
+            font-size: 20px;
+        }
+        h3{
+            font-size: 18px;
+        }
+        .fade-enter-active, .fade-leave-active {
+            transition: opacity 1s
+        }
+        .fade-enter, .fade-leave-to{
+            opacity: 0
+        }
+    </style>
+</head>
+<body>
+<div id="exa-1">
+    <p>{{message | capitalize}}</p>
+</div>
+<script>
+    new Vue({
+        el:'#exa-1',
+        data:{
+            message:'hello'
+        },
+        filters:{
+            capitalize:function(value){
+                if (!value) return '';
+                value = value.toString();
+                return value.charAt(0).toUpperCase()+value.slice(1);
+            }
+        }
+    });
+</script>
+</body>
+</html>
